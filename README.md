@@ -25,6 +25,7 @@ This project allows users to visualize mathematical functions as graphs and list
 - **Frontend**: 
   - React (via Remix)
   - TailwindCSS for styling
+  - MathJS (instead of eval() )
 - **Backend**: 
   - Tone.js for audio synthesis
 - **Canvas API**: For rendering graphs dynamically
@@ -38,7 +39,7 @@ To set up the project locally, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/graph-audio-visualizer.git
+   git clone https://github.com/debadityamalakar/graph-audio-visualizer.git
    ```
 
 2. **Install dependencies**:
@@ -120,7 +121,7 @@ This project is open-source and available under the MIT License.
 
 ## Contact
 
-For questions or inquiries, feel free to reach out via [email](mailto:your-email@example.com).
+For questions or inquiries, feel free to reach out via [email](mailto:debadityamalakar@gmail.com).
 
 ---
 
