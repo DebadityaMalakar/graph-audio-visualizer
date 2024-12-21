@@ -1,6 +1,10 @@
 import { MetaFunction } from "@remix-run/react";
 import { useEffect, useState, useRef } from "react";
 import * as Tone from "tone";
+import { create, all } from 'mathjs'
+
+const config = { }
+const math = create(all, config)
 
 export const meta: MetaFunction = () => {
   return [
@@ -13,7 +17,7 @@ export const meta: MetaFunction = () => {
 };
 
 export default function Index() {
-  const [fxExpression, setFxExpression] = useState<string>("Math.sin(x)");
+  const [fxExpression, setFxExpression] = useState<string>("sin(x)");
   const [lowerLimit, setLowerLimit] = useState<number>(-10);
   const [upperLimit, setUpperLimit] = useState<number>(10);
   const [audioPlaying, setAudioPlaying] = useState<boolean>(false);
@@ -67,7 +71,7 @@ export default function Index() {
       return x % 2 === 0 ? x / 2 : 3 * x + 1;
     }
     try {
-      return eval(fxExpression.replace(/x/g, `(${x})`));
+      return math.evaluate(fxExpression.replace(/x/g, (`${x}`)));
     } catch (error) {
       console.error("Invalid function expression:", error);
       return 0;
@@ -205,7 +209,7 @@ export default function Index() {
   const resetAudio = () => {
     stopAudio();
     setLastPosition(null); // Reset the last position
-    setFxExpression("Math.sin(x)");
+    setFxExpression("sin(x)");
     setLowerLimit(-10);
     setUpperLimit(10);
     setTimeout(generateGraph, 0);
@@ -213,16 +217,43 @@ export default function Index() {
 
   const handleFxExpressionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newExpression = e.target.value;
-    setFxExpression(newExpression);
-
+    let ee = e.target.value;
+  
+    // Regex to match patterns like Math.f(x) or Math.f(x) * Math.z(x)
+    const functionRegex = /([a-zA-Z]+)\.([a-zA-Z]+)\(([^)]+)\)/g;
+  
+    // Initialize the updated expression
+    let updatedExpression = ee;
+  
+    // Find all matches of Math.function(x)
+    const matches = [...ee.matchAll(functionRegex)];
+  
+    // For each match, extract the function name and arguments, then build the expression
+    matches.forEach((match) => {
+      if (match) {
+        const functionName = match[2]; // Extracted function (e.g., f)
+        const argument = match[3];     // Extracted argument (e.g., x)
+  
+        // Replace Math.f(x) with f(x)
+        updatedExpression = updatedExpression.replace(match[0], `${functionName}(${argument})`);
+      }
+    });
+  
+    // Set the updated expression
+    setFxExpression(updatedExpression);
+  
+    // Handle special case 'collatz'
     if (newExpression.toLowerCase() === "collatz") {
       setLowerLimit(0);
       setUpperLimit(100);
     }
   };
+  
+  
 
   return (
     <div className={`min-h-screen flex flex-col items-center p-8 ${isDarkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+
       <div className="absolute top-4 right-4">
         <button
           onClick={handleDarkModeToggle}
@@ -246,7 +277,7 @@ export default function Index() {
             Enter f(x):
           </label>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-            Define a mathematical function of x (e.g., <code>x * x</code>, <code>3 * x + 1</code>, <code>Math.sin(x)</code>).
+            Define a mathematical function of x (e.g., <code>x * x</code>, <code>3 * x + 1</code>, <code>Math.sin(x)</code>, <code>sin(x)</code> ).
           </p>
           <input
             type="text"
